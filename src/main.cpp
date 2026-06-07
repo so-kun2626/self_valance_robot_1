@@ -15,17 +15,18 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  digitalWrite(motorPIN1, HIGH);
-  digitalWrite(motorPIN2, LOW);
-  digitalWrite(motorPIN3, HIGH);
-  digitalWrite(motorPIN4, LOW);
-  delay(1000);
-  
-  digitalWrite(motorPIN1, LOW);
-  digitalWrite(motorPIN2, HIGH);
-  digitalWrite(motorPIN3, LOW);
-  digitalWrite(motorPIN4, HIGH);
-  delay(1000);
+  for (int a=0; a<255; a+=20) {
+    analogWrite(motorPIN1, a);
+    analogWrite(motorPIN2, 0);
+    delay(100);
+  }
+  for (int a=0; a<255; a+=20) {
+    analogWrite(motorPIN1, 0);
+    analogWrite(motorPIN2, a);
+    delay(100);
+  }
 }
+
+
 
 
