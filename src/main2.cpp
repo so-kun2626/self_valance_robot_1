@@ -1,5 +1,6 @@
 #include<Arduino.h>
 #include<Wire.h>
+#include<math.h>
 
 const int MPU_addr = 0x68;
 
@@ -10,6 +11,10 @@ struct IMU_data{
 
 IMU_data sensorData;
 
+float calculateAngle(int16_t accX, int16_t accZ){
+  return atan2 (accX, accZ) * 180 / M_PI;
+}
+
 void setup(){
   Serial.begin(115200);
   Wire.begin();
@@ -19,7 +24,7 @@ void setup(){
   Wire.write(0);
   Wire.endTransmission(true);
 
-  Serial.println("MPU6050 is ready");
+  Serial.println("accX,accY,accZ,gyroX,gyroY,gyroZ,angle");
 }
 
 void loop(){
@@ -27,7 +32,8 @@ void loop(){
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x3B);
   Wire.endTransmission(false);
-  Wire.requestFrom(MPU_addr,14,true);
+  // call overload with exact types to avoid ISO C++ ambiguous overloads
+  Wire.requestFrom((uint8_t)MPU_addr, (size_t)14, (bool)true);
 
   sensorData.accX = Wire.read() << 8 |  Wire.read();
   sensorData.accY = Wire.read() << 8 |  Wire.read();
@@ -36,18 +42,21 @@ void loop(){
   sensorData.gyroY = Wire.read() << 8 |  Wire.read();
   sensorData.gyroZ = Wire.read() << 8 |  Wire.read();
 
-  Serial.print("accX: ");
-  Serial.println(sensorData.accX);
-  Serial.print("accY: ");
-  Serial.println(sensorData.accY);
-  Serial.print("accZ: ");
-  Serial.println(sensorData.accZ);
-  Serial.print("gyroX: ");
-  Serial.println(sensorData.gyroX);
-  Serial.print("gyroY: ");
-  Serial.println(sensorData.gyroY);
-  Serial.print("gyroZ: ");
-  Serial.println(sensorData.gyroZ);
+  float angle = calculateAngle(sensorData.accX, sensorData.accZ);
+
+  Serial.print(sensorData.accX);
+  Serial.print(",");
+  Serial.print(sensorData.accY);
+  Serial.print(",");
+  Serial.print(sensorData.accZ);
+  Serial.print(",");
+  Serial.print(sensorData.gyroX);
+  Serial.print(",");
+  Serial.print(sensorData.gyroY);
+  Serial.print(",");
+  Serial.print(sensorData.gyroZ);
+  Serial.print(",");
+  Serial.println(angle);
 
   delay(100);
 }
