@@ -1,5 +1,5 @@
 #include<Arduino.h>
-#include<wire.h>
+#include<Wire.h>
 
 const int MPU_addr = 0x68;
 
@@ -27,12 +27,27 @@ void loop(){
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x3B);
   Wire.endTransmission(false);
-  Wire.requestFrom(MPU_addr,2,true);
+  Wire.requestFrom(MPU_addr,14,true);
 
   sensorData.accX = Wire.read() << 8 |  Wire.read();
+  sensorData.accY = Wire.read() << 8 |  Wire.read();
+  sensorData.accZ = Wire.read() << 8 |  Wire.read();
+  sensorData.gyroX = Wire.read() << 8 |  Wire.read();
+  sensorData.gyroY = Wire.read() << 8 |  Wire.read();
+  sensorData.gyroZ = Wire.read() << 8 |  Wire.read();
 
   Serial.print("accX: ");
   Serial.println(sensorData.accX);
-  
+  Serial.print("accY: ");
+  Serial.println(sensorData.accY);
+  Serial.print("accZ: ");
+  Serial.println(sensorData.accZ);
+  Serial.print("gyroX: ");
+  Serial.println(sensorData.gyroX);
+  Serial.print("gyroY: ");
+  Serial.println(sensorData.gyroY);
+  Serial.print("gyroZ: ");
+  Serial.println(sensorData.gyroZ);
+
   delay(100);
 }
