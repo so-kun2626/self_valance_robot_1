@@ -11,6 +11,9 @@ struct IMU_data{
 
 IMU_data sensorData;
 
+unsigned long lastTime = 0; // For timing the loop
+float filteredAngle = 0;  // For complementary filter
+
 float calculateAngle(int16_t accX, int16_t accZ){
   return atan2 (accX, accZ) * 180 / M_PI;
 }
@@ -24,7 +27,7 @@ void setup(){
   Wire.write(0);
   Wire.endTransmission(true);
 
-  Serial.println("accX,accY,accZ,gyroX,gyroY,gyroZ,angle");
+  Serial.println("AccAngle,FilteredAngle");
 }
 
 void loop(){
@@ -38,25 +41,24 @@ void loop(){
   sensorData.accX = Wire.read() << 8 |  Wire.read();
   sensorData.accY = Wire.read() << 8 |  Wire.read();
   sensorData.accZ = Wire.read() << 8 |  Wire.read();
+
+  Wire.read(); Wire.read(); // Skip two bytes
+  
   sensorData.gyroX = Wire.read() << 8 |  Wire.read();
   sensorData.gyroY = Wire.read() << 8 |  Wire.read();
   sensorData.gyroZ = Wire.read() << 8 |  Wire.read();
 
-  float angle = calculateAngle(sensorData.accX, sensorData.accZ);
+  float accAngle = calculateAngle(sensorData.accX, sensorData.accZ);
 
-  Serial.print(sensorData.accX);
-  Serial.print(",");
-  Serial.print(sensorData.accY);
-  Serial.print(",");
-  Serial.print(sensorData.accZ);
-  Serial.print(",");
-  Serial.print(sensorData.gyroX);
-  Serial.print(",");
-  Serial.print(sensorData.gyroY);
-  Serial.print(",");
-  Serial.print(sensorData.gyroZ);
-  Serial.print(",");
-  Serial.println(angle);
+  unsigned long currentTIme = micros();
+  float dt = (currentTIme - lastTime) / 1000000.0; // Convert to seconds
+  lastTime = currentTIme;
 
-  delay(100);
+  // Complementary filter
+  filteredAngle = 0.98 * (filteredAngle + sensorData.gyroY * dt / 131.0) + 0.02 * accAngle;  // 今回のセンサーの感度は131 LSB/°/sなので、gyroYを131で割って角速度を得る
+  Serial.print(accAngle);
+  Serial.print(",");
+  Serial.println(filteredAngle);
+
+  delay(10); // Loop every 10ms
 }
