@@ -20,11 +20,13 @@ unsigned long lastTime = 0; // For timing the loop
 float filteredAngle = 0.0;  // For complementary filter
 
 // PID control parameters
-float Kp =15.0;  // Proportional gain
-float Ki = 0.0;  // Integral gain
-float Kd = 0.0;  // Derivative gain
+float Kp =26.0;  // Proportional gain
+float Ki = 0.2 ;  // Integral gain
+float Kd = 0.5
 
-float targetAngle = 0.0;  // 目標角度（水平状態）
+;  // Derivative gain
+
+float targetAngle = -2.7;  // 目標角度（水平状態）
 float lastError =0.0;     // 前回の誤差
 float integral = 0.0;  // 積分項の初期値
 
@@ -34,12 +36,7 @@ float calculateAngle(int16_t accX, int16_t accZ){
 
 void driveMotor(int power){
 
-    if(power > -20&& power < 20
-    
-    
-    
-    
-    ){
+    if(power > -20&& power < 20){ 
         // 死点を考慮して、出力が小さい場合はモーターを止める
         analogWrite(motorPin1, 0);
         analogWrite(motorPin2, 0);
@@ -48,7 +45,7 @@ void driveMotor(int power){
         return;
     }
 
-    int offset = 20; // モーターの死点を補正するためのオフセット値
+    int offset = 10; // モーターの死点を補正するためのオフセット値
 
     if(power > 0){
         power = power + offset; // 正の値にオフセットを適用
@@ -112,7 +109,7 @@ void loop(){
     // 加速度センサーから角度を計算
     float accAngle = calculateAngle(sensorData.accX, sensorData.accZ);
     // ジャイロセンサーから角速度を計算
-    float gyroRate = sensorData.gyroY / 131.0; // ジャイロの感度は131 LSB/°/s
+    float gyroRate = -sensorData.gyroY / 131.0; // ジャイロの感度は131 LSB/°/s
     // タイミングの計算
     unsigned long currentTime = micros();
     float dt = (currentTime - lastTime) / 1000000.0; // 秒に変換
