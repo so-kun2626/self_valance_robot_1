@@ -16,20 +16,26 @@ struct IMU_data{
 
 IMU_data sensorData;
 
-unsigned long lastTime = 0; // For timing the loop
+unsigned long lastTime = 0.0
+
+\
+
+; // For timing the loop
 float filteredAngle = 0.0;  // For complementary filter
 
 // PID control parameters
-float Kp =28.0;  // Proportional gain　
-float Ki = 0.0 ;  // Integral gain
-float Kd = 1.0;  // Derivative gain
+float Kp =26.7;  // Proportional gain　
+float Ki = 0.5 ;  // Integral gain
+float Kd = 0.8;  // Derivative gain
 
-float targetAngle = 0.0;  // 目標角度（水平状態）
+float targetAngle = -3.2;  // 目標角度（水平状態）
 float lastError =0.0;     // 前回の誤差
 float integral = 0.0;  // 積分項の初期値
 
+const unsigned long CONTROL_PERIOD = 10000; // 制御周期
+
 float calculateAngle(int16_t accX, int16_t accZ){
-    return atan2(accX, accZ)*180 / M_PI;  
+    return atan2(accX, accZ)*180 / M_PI;  // atan2関数を使用して角度を計算し、度に変換
 }
 
 void driveMotor(int power){
@@ -92,6 +98,10 @@ void setup(){
 }
 
 void loop(){
+    while(micros() - lastTime < CONTROL_PERIOD){
+        // 制御周期が経過するまで待機
+    }
+
     // MPU6050からセンサーデータを読み取る
     Wire.beginTransmission(MPU_addr);
     Wire.write(0x3B);
@@ -113,7 +123,9 @@ void loop(){
     // タイミングの計算
     unsigned long currentTime = micros();
     float dt = (currentTime - lastTime) / 1000000.0; // 秒に変換
-    lastTime = currentTime;
+
+    lastTime = micros(); // タイミングの更新
+
     // コンプリメンタリフィルタで角度を推定
     filteredAngle = 0.98 * (filteredAngle + gyroRate * dt) + 0.02 * accAngle;
 
@@ -133,6 +145,4 @@ void loop(){
     Serial.print(filteredAngle);
     Serial.print(",");
     Serial.println(output);
-
-    delay(10); // ループの実行間隔を10msに設定
 }
