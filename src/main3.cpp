@@ -20,18 +20,16 @@ unsigned long lastTime = 0; // For timing the loop
 float filteredAngle = 0.0;  // For complementary filter
 
 // PID control parameters
-float Kp =26.0;  // Proportional gain
-float Ki = 0.2 ;  // Integral gain
-float Kd = 0.5
+float Kp =28.0;  // Proportional gain　
+float Ki = 0.0 ;  // Integral gain
+float Kd = 1.0;  // Derivative gain
 
-;  // Derivative gain
-
-float targetAngle = -2.7;  // 目標角度（水平状態）
+float targetAngle = 0.0;  // 目標角度（水平状態）
 float lastError =0.0;     // 前回の誤差
 float integral = 0.0;  // 積分項の初期値
 
 float calculateAngle(int16_t accX, int16_t accZ){
-    return atan2(accX, accZ)*180 / M_PI;
+    return atan2(accX, accZ)*180 / M_PI;  
 }
 
 void driveMotor(int power){
@@ -89,6 +87,8 @@ void setup(){
     Wire.endTransmission(true);
 
     Serial.println("AccAngle,FilteredAngle");
+
+    lastTime = micros();  // タイミングの初期化
 }
 
 void loop(){
