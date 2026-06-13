@@ -4,7 +4,7 @@
 const int ENCODER_A_PIN = 34;
 const int ENCODER_B_PIN = 35;
 
-ESP32Encoder encoder1;
+ESP32Encoder encoder1;  
 
 const float WHEEL_RADIUS = 0.024; // ホイールの半径（メートル）
 const float GIAR_RATIO = 30.0; // ギア比（必要に応じて変更）
@@ -49,9 +49,10 @@ void loop(){
     if (timeDiff > 0) { // 時間差が0でないことを確認
         speed = (countDiff * DISTANCE_PER_PULSE) / (timeDiff / 1000000.0); // timeDiffを秒に変換
     }
-
-    filteredSpeed = 0.8 * filteredSpeed + 0.2 * speed; // ローパスフィルタで速度を平滑化
-
+    
+    // ローパスフィルタで速度を平滑化
+    filteredSpeed = 0.8 * filteredSpeed + 0.2 * speed; 
+    
     //速度をシリアルモニタに表示
     Serial.print(speed);
     Serial.print(",");
