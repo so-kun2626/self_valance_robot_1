@@ -16,11 +16,7 @@ struct IMU_data{
 
 IMU_data sensorData;
 
-unsigned long lastTime = 0.0
-
-\
-
-; // For timing the loop
+unsigned long lastTime = 0.0; // For timing the loop
 float filteredAngle = 0.0;  // For complementary filter
 
 // PID control parameters
