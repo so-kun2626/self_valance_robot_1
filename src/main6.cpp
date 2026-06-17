@@ -49,6 +49,7 @@ float Ki_speed = 0.9;
 float speedIntegral = 0.0;
 
 float mechanicalOffset = -3.0;  // 目標角度（水平状態）
+
 float lastError =0.0;     // 前回の誤差
 float integral = 0.0;  // 積分項の初期値
 
