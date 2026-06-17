@@ -61,7 +61,7 @@ float calculateAngle(int16_t accX, int16_t accZ){
 
 void driveMotor(int power){
 
-    if(power > -20&& power < 20){ 
+    if(power == 0){ 
         // 死点を考慮して、出力が小さい場合はモーターを止める
         analogWrite(motorPin1, 0);
         analogWrite(motorPin2, 0);
@@ -128,7 +128,7 @@ void loop(){
     unsigned long currentTime = micros();
     unsigned long timeDiff = currentTime - lastTime;
     
-    if(timeDiff >= 10000){ // 10ms（0.01秒）ごとに計算
+    if(timeDiff >= 5000){ // 5ms（0.005秒）ごとに計算
         // --- 時間の計算 ---
         float dt = timeDiff / 1000000.0; // マイクロ秒を秒に変換
 
@@ -197,7 +197,7 @@ void loop(){
         lastError = error; // 誤差を保存
 
         // 職人のPID出力計算
-        float output = Kp * error + Ki * integral + Kd * derivative;
+        float output = Kp * error + Ki * integral + Kd * (-gyroRate);
 
         // 筋肉（モーター）を動かす
         driveMotor((int)output);
