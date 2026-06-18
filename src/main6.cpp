@@ -34,6 +34,7 @@ const float DISTANCE_PER_PULSE = WHEEL_CIRCUMFERENCE/WHEEL_PULSE;
 
 unsigned long lastTime = 0.0; // For timing the loop
 float filteredAngle = 0.0;  // For complementary filter
+float speedOutput = 0.0;
 
 int64_t lastCountR = 0;
 int64_t lastCountL = 0;
@@ -48,7 +49,7 @@ float Kp_Speed =9.0;
 float Ki_speed = 0.9;
 float speedIntegral = 0.0;
 
-float mechanicalOffset = -3.0;  // 目標角度（水平状態）
+float mechanicalOffset = -2.4;  // 目標角度（水平状態）
 
 float lastError =0.0;     // 前回の誤差
 float integral = 0.0;  // 積分項の初期値
@@ -153,6 +154,7 @@ void loop(){
         // コンプリメンタリフィルタで滑らかな角度（filteredAngle）を推定
         filteredAngle = 0.98 * (filteredAngle + gyroRate * dt) + 0.02 * accAngle;
 
+
         // エンコーダーからスピードを聞く
         int64_t currentCountL = encoderL.getCount();
         int64_t currentCountR = encoderR.getCount();
@@ -171,31 +173,31 @@ void loop(){
         filteredSpeed = 0.8 * filteredSpeed + 0.2 * rawSpeed_Avg;
 
 
-        //  速度PIDの仕事：目標角度を決める
-        float targetSpeed = 0.0; // 最終目標は「止まること」！
-        float speedError = targetSpeed - filteredSpeed;
+        static int speedCounter = 0;
 
-        speedIntegral += speedError*dt;
+        speedCounter++;
+        if (speedCounter >=10){
+           speedCounter = 0;
+           
+           float targetspeed = 0;
+           float speedError = targetspeed - filteredSpeed;
 
-        speedIntegral = constrain(speedIntegral, -5.0, 5.0);
+           speedIntegral += speedError * 0.05;
 
-        // スピードのズレから「どれくらい傾くべきか」をP制御で計算
-        float speedOutput = -(Kp_Speed * speedError) - (Ki_speed * speedIntegral);
+           speedIntegral = constrain(speedIntegral, -5, 5);
 
-        // いままで手動で入れていた「重心のゲタ合わせ」
-        
+           speedOutput = -(Kp_Speed * speedError) - (Ki_speed * speedIntegral);
+        }
 
         // 最終的な目標角度（無茶な指示にならないよう ±10度で制限！）
-        float targetAngle = constrain(speedOutput + mechanicalOffset, -10.0, 10.0);
+        float targetAngle = constrain(speedOutput + mechanicalOffset, -5.0, 5.0);
 
 
         // 角度PID：モーターのパワーを決める
         // 常に変わる社長の指示（targetAngle）に向かってバランスをとる！
         float error = targetAngle - filteredAngle; 
         integral += error * dt; 
-        float derivative = (error - lastError) / dt; 
-        lastError = error; // 誤差を保存
-
+        
         // 職人のPID出力計算
         float output = Kp * error + Ki * integral + Kd * (-gyroRate);
 
@@ -214,5 +216,9 @@ void loop(){
         Serial.print(filteredAngle);
         Serial.print(",");
         Serial.println(filteredSpeed * 10); // スピードは波形を見やすくするために10倍しておくよ
+
+        Serial.print(rawSpeedL);
+        Serial.print(",");
+        Serial.println(rawSpeedR);
     }
-}
+} 
