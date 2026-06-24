@@ -175,6 +175,7 @@ void loop(){
 
         static int speedCounter = 0;
 
+        // 10回に1回だけスピード制御を行う
         speedCounter++;
         if (speedCounter >=10){
            speedCounter = 0;
@@ -182,11 +183,11 @@ void loop(){
            float targetspeed = 0;
            float speedError = targetspeed - filteredSpeed;
 
-           speedIntegral += speedError * 0.05;
+           speedIntegral += speedError * 0.05;  // 0.05秒ごとに積分する
 
-           speedIntegral = constrain(speedIntegral, -5, 5);
+           speedIntegral = constrain(speedIntegral, -5, 5);  // 積分項の制限
 
-           speedOutput = -(Kp_Speed * speedError) - (Ki_speed * speedIntegral);
+           speedOutput = -(Kp_Speed * speedError) - (Ki_speed * speedIntegral);  // スピード制御の出力を計算
         }
 
         // 最終的な目標角度（無茶な指示にならないよう ±10度で制限！）
@@ -199,7 +200,7 @@ void loop(){
         integral += error * dt; 
         
         // 職人のPID出力計算
-        float output = Kp * error + Ki * integral + Kd * (-gyroRate);
+        float output = Kp * error + Ki * integral + Kd * (-gyroRate);  
 
         // 筋肉（モーター）を動かす
         driveMotor((int)output);
